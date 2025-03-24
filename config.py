@@ -29,6 +29,7 @@ cfg.train.milestones = [0.5, 1.5]
 cfg.train.gamma = 0.1
 cfg.train.pths_path = './pths/pretrain'
 cfg.train.save_interval = 1000
+cfg.train.preload = ''
 
 cfg.ft = edict()
 cfg.ft.icdar2013_img_path = '../data/ICDAR2013/train_img'

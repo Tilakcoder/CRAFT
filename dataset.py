@@ -6,7 +6,7 @@ import math
 import scipy.io as scio
 import re
 from PIL import Image, ImageDraw
-from skimage.morphology import watershed
+from skimage.segmentation import watershed
 from config import cfg
 from torch.utils import data
 from torchvision import transforms
@@ -218,7 +218,11 @@ class SynthTextDataset(data.Dataset):
 		return len(self.img_files)
 
 	def __getitem__(self, index):
-		img = Image.open(os.path.join(self.cfg.synthtext_img_path, self.img_files[index][0]))
+		img_path = os.path.join(self.cfg.synthtext_img_path, self.img_files[index][0])
+		try:
+			img = Image.open(img_path)
+		except:
+			return None, None, None, img_path
 		wordBB = self.wordBB[index].reshape((2,4,-1))
 		charBB = self.charBB[index].reshape((2,4,-1))
 		txt = self.txt[index]

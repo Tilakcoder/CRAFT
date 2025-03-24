@@ -13,8 +13,11 @@ from sync_batchnorm import convert_model
 
 
 def train(cfg):
-	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	device_name = "cuda:0" if torch.cuda.is_available() else "cpu"
+	device = torch.device(device_name)
 	model = CRAFT()
+	if cfg.preload:
+		model.load_state_dict(torch.load(cfg.preload, map_location=device))
 	model = convert_model(model)
 	data_parallel = False
 	if torch.cuda.device_count() > 1:
@@ -32,10 +35,14 @@ def train(cfg):
 	scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[int(batch_num * i) for i in cfg.milestones], gamma=cfg.gamma)
 	
 	cnt = 0
+	lost_images = []
 	for epoch in range(cfg.epoch_iter):	
 		epoch_loss = 0
 		epoch_time = time.time()
 		for i, (img, gt_region, gt_affinity, conf_map) in enumerate(train_loader):
+			if img is None:
+				lost_images.append(conf_map)
+				continue
 			model.train()
 			scheduler.step()
 			start_time = time.time()
@@ -58,6 +65,12 @@ def train(cfg):
 		print('epoch_loss is {:.8f}, epoch_time is {:.8f}'.format(epoch_loss/batch_num, time.time()-epoch_time))
 		print(time.asctime(time.localtime(time.time())))
 		print('='*50)
+		state_dict = model.module.state_dict() if data_parallel else model.state_dict()
+		torch.save(state_dict, os.path.join(cfg.pths_path, 'model_epoch_complete_{}.pth'.format(epoch)))
+
+	print("IMAGES that were skipped due to not found: ", lost_images)
+	
+
 
 
 if __name__ == '__main__':
