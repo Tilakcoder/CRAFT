@@ -71,6 +71,8 @@ def restore_boxes(region, affinity, region_thresh, affinity_thresh, remove_thres
 def detect_single_image(img, model, device, cfg):
 	img, ratio_h, ratio_w = resize_img(img, cfg.long_side)
 	region, affinity = get_score(img, model, device)
+	cv2.imwrite("outputs/region.png", region*255)
+	cv2.imwrite("outputs/affinity.png", affinity*255)
 	boxes = restore_boxes(region, affinity, cfg.region_thresh, cfg.affinity_thresh, cfg.remove_thresh, (ratio_h, ratio_w))
 	return boxes
 
@@ -101,10 +103,11 @@ if __name__ == '__main__':
 	model_path  = './pths/pretrain/model_iter_50000.pth'
 	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 	model = CRAFT().to(device)
-	model.load_state_dict(torch.load(model_path, map_location='cuda:0'))
+	model.load_state_dict(torch.load(model_path, map_location=device))
+	# model.load_state_dict(torch.load(model_path, map_location='cuda:0'))
 	
 	model.eval()
 	img = Image.open(img_path)
 	boxes = detect_single_image(img, model, device, cfg.test)
 	img = plot_boxes(img, boxes)
-	img.save('res.bmp')
+	img.save('outputs/res.bmp')

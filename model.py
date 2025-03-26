@@ -153,13 +153,14 @@ class CRAFT(nn.Module):
 		self.merge	 = merge()
 
 	def forward(self, x):
+		print('INSIDE CRAFT')
 		return self.merge(self.extractor(x))
 
 if __name__ == '__main__':
 	m = CRAFT(True)
 	x = torch.randn(1, 3, 512, 512)
 	region_score, affinity_score = m(x)
-	print(region_score.size())
-	print(affinity_score.size())
+	# print(region_score.size())
+	# print(affinity_score.size())
 	print(list(list(m.children())[0].children())[0])
 

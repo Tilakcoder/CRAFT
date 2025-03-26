@@ -3,3 +3,5 @@ env/*
 pths/
 pths/*
 __pycache__/
+outputs/
+outputs/*

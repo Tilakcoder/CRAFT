@@ -2,7 +2,7 @@ import torch
 from torch.utils import data
 from torch import nn
 from torch.optim import lr_scheduler
-from model import CRAFT
+from model_resnet import CRAFT
 from loss import Loss
 import os
 import time
